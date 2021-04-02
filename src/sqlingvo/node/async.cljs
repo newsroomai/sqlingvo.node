@@ -8,16 +8,15 @@
             [sqlingvo.node.driver :as driver]
             [sqlingvo.util :as util]))
 
-(def pg
+(def ^js pg
   "The Node.js PostgreSQL client."
-  (let [package (node/require "pg")]
-    (or (.-native package) package)))
+  (node/require "pg"))
 
-(def Pool
+(def ^js Pool
   "The database connection pool."
   (.-Pool pg))
 
-(def Client
+(def ^js Client
   "The database client."
   (.-Client pg))
 
@@ -162,8 +161,8 @@
   "Return an new database."
   [spec & [opts]]
   (let [db (sql/db spec opts)]
-    (->> {:eval-fn execute
-          :sql-placeholder util/sql-placeholder-count}
-         (merge db))))
+    (assoc db
+      :eval-fn execute
+      :sql-placeholder util/sql-placeholder-count)))
 
 (s/fdef db :args (s/cat :db any? :opts (s/? (s/nilable map?))))

@@ -88,7 +88,7 @@
           _ (<!? (drop-countries db))
           (done)))))
 
-(def pg-statisticts
+(def pg-statistics
   {:commit-action nil,
    :reference-generation nil,
    :is-typed "NO",
@@ -102,7 +102,7 @@
    :table-name "pg_statistic",
    :table-type "BASE TABLE"})
 
-(defn- select-pg-statisticts [db]
+(defn- select-pg-statistics [db]
   (sql/select db [:*]
     (sql/from :information_schema.tables)
     (sql/where '(= :table_name "pg_statistic"))))
@@ -110,27 +110,29 @@
 (deftest test-hyphenate
   (async done
     (go (let [db (<? (node/connect db))]
-          (is (= (<!? (select-pg-statisticts db))
-                 [pg-statisticts]))
+          (is (= (<!? (select-pg-statistics db))
+                 [pg-statistics]))
           (<? (node/disconnect db))
           (done)))))
 
 (deftest test-pool
   (async done
-    (go (let [db (node/start db)]
-          (is (:pool db))
-          (is (= (.-totalCount (:pool db)) 0))
-          (testing "use first available client"
-            (is (= (<!? (select-pg-statisticts db))
-                   [pg-statisticts])))
-          (testing "connect client and release"
-            (let [db (<? (node/connect db))]
-              (is (:connection db))
-              (is (= (.-totalCount (:pool db)) 1))
-              (is (= (<!? (select-pg-statisticts db))
-                     [pg-statisticts]))
-              (let [db (<? (node/disconnect db))]
-                (is (nil? (:connection db)))
-                (let [db (<? (node/stop db))]
-                  (is (nil? (:pool db)))
-                  (done)))))))))
+    (let [db (node/start db)
+          ^js pool (:pool db)]
+      (go
+        (is pool)
+        (is (= (.-totalCount pool) 0))
+        (testing "use first available client"
+          (is (= (<!? (select-pg-statistics db))
+                 [pg-statistics])))
+        (testing "connect client and release"
+          (let [db (<? (node/connect db))]
+            (is (:connection db))
+            (is (= (.-totalCount pool) 1))
+            (is (= (<!? (select-pg-statistics db))
+                   [pg-statistics]))
+            (let [db (<? (node/disconnect db))]
+              (is (nil? (:connection db)))
+              (let [db (<? (node/stop db))]
+                (is (nil? (:pool db)))
+                (done)))))))))

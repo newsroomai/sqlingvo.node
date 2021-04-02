@@ -11,6 +11,9 @@ pom.xml.asc
 .hg/
 .cljs_node_repl
 node_modules
-/package.json
 /package-lock.json
 /out
+.idea
+*.iml
+.cpcache
+.shadow-cljs

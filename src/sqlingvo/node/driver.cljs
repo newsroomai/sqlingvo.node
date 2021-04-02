@@ -20,7 +20,7 @@
     (->> (reduce #(assoc! %1 (keyword (convert %2)) (gobj/get obj %2))
                  (transient {})
                  (gobj/getKeys obj))
-         (persistent! ))))
+         (persistent!))))
 
 (s/fdef to-row
   :args (s/cat :db sql/db? :obj any?))
