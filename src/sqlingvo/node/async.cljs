@@ -45,7 +45,7 @@
    :password                (:password db)
    :port                    (:server-port db)
    :user                    (:username db)
-   :ssl                     {:rejectUnauthorized true}})
+   :ssl                     {:rejectUnauthorized false}})
 
 (defn- connect-client
   "Connect to the database using a new client."
